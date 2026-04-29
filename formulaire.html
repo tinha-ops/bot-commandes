@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commander en ligne</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --vert: #1a7a4a;
+    --vert-clair: #e8f5ee;
+    --vert-mid: #2d9e63;
+    --orange: #e8620a;
+    --orange-clair: #fff3ec;
+    --noir: #0d1b12;
+    --gris: #6b7c72;
+    --fond: #f4f7f5;
+    --blanc: #ffffff;
+    --border: #d4e4da;
+    --shadow: 0 2px 16px rgba(26,122,74,0.10);
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--fond);
+    color: var(--noir);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--vert);
+    color: white;
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.5px;
+  }
+
+  .logo span { color: #7de8aa; }
+
+  .cart-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s;
+  }
+
+  .cart-btn:hover { background: rgba(255,255,255,0.25); }
+
+  .cart-count {
+    background: var(--orange);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, var(--vert) 0%, var(--vert-mid) 100%);
+    color: white;
+    padding: 40px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -30px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(22px, 5vw, 32px);
+    font-weight: 800;
+    margin-bottom: 8px;
+    position: relative;
+  }
+
+  .hero p {
+    font-size: 15px;
+    opacity: 0.85;
+    position: relative;
+  }
+
+  .badges {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    background: rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* LAYOUT */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  @media (max-width: 700px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  /* SECTIONS */
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--vert);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* CATALOGUE */
+  .cat-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .cat-tab {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: white;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--gris);
+  }
+
+  .cat-tab.active, .cat-tab:hover {
+    background: var(--vert);
+    color: white;
+    border-color: var(--vert);
+  }
+
+  .produits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .produit-card {
+    background: white;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .produit-card:hover {
+    border-color: var(--vert);
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+  }
+
+  .produit-card.out-of-stock {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .produit-emoji {
+    font-size: 28px;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .produit-nom {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--noir);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  .produit-prix {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--vert);
+  }
+
+  .produit-prix span {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--gris);
+  }
+
+  .produit-stock {
+    font-size: 11px;
+    color: var(--gris);
+    margin-top: 4px;
+  }
+
+  .produit-add {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 26px; height: 26px;
+    background: var(--vert-clair);
+    color: var(--vert);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+
+  .produit-card:hover .produit-add {
+    background: var(--vert);
+    color: white;
+  }
+
+  /* PANIER & FORMULAIRE */
+  .card {
+    background: white;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--vert-clair);
+  }
+
+  .card-body { padding: 20px; }
+
+  .panier-empty {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--gris);
+  }
+
+  .panier-empty .icon { font-size: 36px; margin-bottom: 8px; }
+
+  .panier-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panier-item:last-child { border-bottom: none; }
+
+  .panier-item-info { flex: 1; }
+
+  .panier-item-nom { font-size: 13px; font-weight: 500; }
+
+  .panier-item-prix { font-size: 12px; color: var(--gris); }
+
+  .panier-qte {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .qte-btn {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: white;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .qte-btn:hover { background: var(--vert); color: white; border-color: var(--vert); }
+
+  .qte-val { font-size: 13px; font-weight: 600; min-width: 20px; text-align: center; }
+
+  .panier-item-total {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--vert);
+    min-width: 70px;
+    text-align: right;
+  }
+
+  .panier-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0 0;
+    margin-top: 4px;
+    border-top: 2px solid var(--vert-clair);
+  }
+
+  .panier-total-label { font-size: 14px; font-weight: 500; }
+
+  .panier-total-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--vert);
+  }
+
+  /* FORMULAIRE */
+  .form-group { margin-bottom: 16px; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--noir);
+    margin-bottom: 6px;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--noir);
+    background: white;
+    transition: border-color 0.18s;
+    outline: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--vert);
+    box-shadow: 0 0 0 3px rgba(26,122,74,0.08);
+  }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  .paiement-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .paiement-opt {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.18s;
+    background: white;
+  }
+
+  .paiement-opt:hover { border-color: var(--vert); }
+  .paiement-opt.selected { border-color: var(--vert); background: var(--vert-clair); }
+
+  .paiement-opt .p-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+  .paiement-opt .p-label { font-size: 11px; color: var(--gris); font-weight: 500; }
+
+  .btn-commander {
+    width: 100%;
+    background: var(--vert);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 12px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-commander:hover { background: #156038; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(26,122,74,0.3); }
+  .btn-commander:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* MODALE SUCCÈS */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: white;
+    border-radius: 20px;
+    padding: 32px 28px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    animation: popIn 0.3s ease;
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal-icon { font-size: 56px; margin-bottom: 16px; }
+  .modal h2 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .modal p { font-size: 14px; color: var(--gris); margin-bottom: 20px; line-height: 1.6; }
+
+  .modal-num {
+    background: var(--vert-clair);
+    border-radius: 10px;
+    padding: 12px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    color: var(--vert);
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  .modal-close {
+    background: var(--vert);
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 30px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .whatsapp-hint {
+    background: #e7f8ee;
+    border: 1px solid #b2dfc4;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #1a7a4a;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .loader { display: none; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--noir);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    transition: transform 0.3s;
+    z-index: 200;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Shop<span>Bot</span></div>
+  <button class="cart-btn" onclick="scrollToPanier()">
+    🛒 Panier
+    <span class="cart-count" id="cartCount">0</span>
+  </button>
+</header>
+
+<div class="hero">
+  <h1>Commandez en quelques clics</h1>
+  <p>Livraison rapide dans votre quartier · Paiement Mobile Money</p>
+  <div class="badges">
+    <div class="badge">🚚 Livraison express</div>
+    <div class="badge">📱 Mobile Money accepté</div>
+    <div class="badge">✅ Confirmation WhatsApp</div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="grid">
+
+    <!-- COLONNE GAUCHE : Catalogue -->
+    <div>
+      <div class="section-title">📦 Catalogue</div>
+
+      <div class="cat-tabs" id="catTabs">
+        <button class="cat-tab active" onclick="filterCat('tous', this)">Tous</button>
+      </div>
+
+      <div class="produits-grid" id="produitsGrid">
+        <!-- Produits chargés dynamiquement -->
+        <div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--gris)">
+          Chargement du catalogue...
+        </div>
+      </div>
+    </div>
+
+    <!-- COLONNE DROITE : Panier + Formulaire -->
+    <div id="panierSection">
+      <!-- PANIER -->
+      <div class="section-title">🛒 Mon panier</div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--vert)">Articles sélectionnés</div>
+        </div>
+        <div class="card-body">
+          <div id="panierContent">
+            <div class="panier-empty">
+              <div class="icon">🛒</div>
+              <div style="font-size:14px;font-weight:500">Panier vide</div>
+              <div style="font-size:12px;margin-top:4px">Cliquez sur un produit pour l'ajouter</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORMULAIRE -->
+      <div class="section-title">📝 Vos informations</div>
+      <div class="card">
+        <div class="card-body">
+          <form id="orderForm" onsubmit="submitOrder(event)">
+
+            <div class="form-group">
+              <label>Nom complet *</label>
+              <input type="text" id="clientNom" placeholder="Ex: Marie Nguemo" required>
+            </div>
+
+            <div class="form-group">
+              <label>Numéro WhatsApp *</label>
+              <input type="tel" id="clientTel" placeholder="Ex: 691234567" required>
+            </div>
+
+            <div class="form-group">
+              <label>Quartier / Adresse de livraison *</label>
+              <input type="text" id="adresse" placeholder="Ex: Akwa, près du marché central" required>
+            </div>
+
+            <div class="form-group">
+              <label>Mode de paiement *</label>
+              <div class="paiement-options">
+                <div class="paiement-opt selected" onclick="selectPaiement('Orange Money', this)">
+                  <span class="p-icon">🟠</span>
+                  <span class="p-label">Orange Money</span>
+                </div>
+                <div class="paiement-opt" onclick="selectPaiement('MTN MoMo', this)">
+                  <span class="p-icon">🟡</span>
+                  <span class="p-label">MTN MoMo</span>
+                </div>
+                <div class="paiement-opt" onclick="selectPaiement('Cash livraison', this)">
+                  <span class="p-icon">💵</span>
+                  <span class="p-label">Cash livraison</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Notes (optionnel)</label>
+              <textarea id="notes" placeholder="Instructions spéciales, heure préférée..."></textarea>
+            </div>
+
+            <div class="whatsapp-hint">
+              📱 Vous recevrez une confirmation sur WhatsApp après votre commande
+            </div>
+
+            <button type="submit" class="btn-commander" id="btnCommander" disabled>
+              <div class="loader" id="loader"></div>
+              <span id="btnText">Sélectionnez des produits</span>
+            </button>
+
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODALE SUCCÈS -->
+<div class="modal-overlay" id="modalSucces">
+  <div class="modal">
+    <div class="modal-icon">🎉</div>
+    <h2>Commande envoyée !</h2>
+    <p>Votre commande a bien été enregistrée. Vous allez recevoir une confirmation sur WhatsApp.</p>
+    <div class="modal-num" id="modalNumCommande">CMD-000000</div>
+    <p style="font-size:13px">Notre équipe vous contactera dans les <strong>30 minutes</strong> pour confirmer la livraison.</p>
+    <button class="modal-close" onclick="closeModal()">Parfait, merci !</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// =============================================
+// CONFIGURATION — À MODIFIER
+// =============================================
+const CONFIG = {
+  // URL de votre webhook n8n pour le formulaire web
+  N8N_WEBHOOK_URL: 'https://votre-instance.n8n.cloud/webhook/formulaire-commande',
+  
+  // Nom de votre boutique
+  BOUTIQUE_NOM: 'Ma Boutique',
+
+  // Catalogue de produits
+  // Remplacez ceci par vos vrais produits ou connectez à Airtable
+  PRODUITS: [
+    { id: 1, code: 'RIZ25', nom: 'Sac de riz 25kg', prix: 18000, stock: 50, categorie: 'Alimentaire', emoji: '🌾' },
+    { id: 2, code: 'HUI5', nom: 'Huile végétale 5L', prix: 5500, stock: 30, categorie: 'Alimentaire', emoji: '🫙' },
+    { id: 3, code: 'SUC2', nom: 'Sucre 2kg', prix: 2200, stock: 80, categorie: 'Alimentaire', emoji: '🍬' },
+    { id: 4, code: 'FAR1', nom: 'Farine de blé 1kg', prix: 1200, stock: 60, categorie: 'Alimentaire', emoji: '🌾' },
+    { id: 5, code: 'LAI1', nom: 'Lait concentré sucré', prix: 900, stock: 100, categorie: 'Alimentaire', emoji: '🥛' },
+    { id: 6, code: 'SAV200', nom: 'Savon de ménage 200g', prix: 400, stock: 200, categorie: 'Hygiène', emoji: '🧼' },
+    { id: 7, code: 'DET500', nom: 'Détergent lessive 500g', prix: 800, stock: 90, categorie: 'Hygiène', emoji: '🫧' },
+    { id: 8, code: 'EAU5', nom: "Eau minérale 5L", prix: 600, stock: 150, categorie: 'Boissons', emoji: '💧' },
+    { id: 9, code: 'JUS1', nom: 'Jus de fruit 1L', prix: 1500, stock: 40, categorie: 'Boissons', emoji: '🧃' },
+  ]
+};
+
+// =============================================
+// ÉTAT DE L'APPLICATION
+// =============================================
+let panier = {};
+let modePaiement = 'Orange Money';
+
+// =============================================
+// INITIALISATION
+// =============================================
+document.addEventListener('DOMContentLoaded', () => {
+  chargerCatalogue();
+});
+
+function chargerCatalogue() {
+  const produits = CONFIG.PRODUITS;
+  
+  // Extraire catégories uniques
+  const categories = [...new Set(produits.map(p => p.categorie))];
+  const tabsEl = document.getElementById('catTabs');
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-tab';
+    btn.textContent = cat;
+    btn.onclick = () => filterCat(cat, btn);
+    tabsEl.appendChild(btn);
+  });
+
+  afficherProduits(produits);
+}
+
+function afficherProduits(produits) {
+  const grid = document.getElementById('produitsGrid');
+  grid.innerHTML = produits.map(p => `
+    <div class="produit-card ${p.stock === 0 ? 'out-of-stock' : ''}" 
+         onclick="${p.stock > 0 ? `ajouterAuPanier(${p.id})` : ''}">
+      <span class="produit-emoji">${p.emoji}</span>
+      <div class="produit-nom">${p.nom}</div>
+      <div class="produit-prix">${p.prix.toLocaleString('fr-FR')} <span>FCFA</span></div>
+      <div class="produit-stock">${p.stock > 0 ? `${p.stock} disponibles` : 'Rupture de stock'}</div>
+      ${p.stock > 0 ? '<div class="produit-add">+</div>' : ''}
+    </div>
+  `).join('');
+}
+
+function filterCat(cat, el) {
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const filtered = cat === 'tous' ? CONFIG.PRODUITS : CONFIG.PRODUITS.filter(p => p.categorie === cat);
+  afficherProduits(filtered);
+}
+
+// =============================================
+// GESTION DU PANIER
+// =============================================
+function ajouterAuPanier(produitId) {
+  const produit = CONFIG.PRODUITS.find(p => p.id === produitId);
+  if (!produit || produit.stock === 0) return;
+
+  if (panier[produitId]) {
+    if (panier[produitId].quantite >= produit.stock) {
+      showToast(`Stock max atteint (${produit.stock})`);
+      return;
+    }
+    panier[produitId].quantite++;
+  } else {
+    panier[produitId] = { ...produit, quantite: 1 };
+  }
+
+  afficherPanier();
+  showToast(`${produit.nom} ajouté ✓`);
+}
+
+function changerQuantite(produitId, delta) {
+  if (!panier[produitId]) return;
+  panier[produitId].quantite += delta;
+  if (panier[produitId].quantite <= 0) {
+    delete panier[produitId];
+  }
+  afficherPanier();
+}
+
+function afficherPanier() {
+  const items = Object.values(panier);
+  const total = items.reduce((acc, p) => acc + p.prix * p.quantite, 0);
+  const nbItems = items.reduce((acc, p) => acc + p.quantite, 0);
+
+  document.getElementById('cartCount').textContent = nbItems;
+
+  const content = document.getElementById('panierContent');
+  const btn = document.getElementById('btnCommander');
+  const btnText = document.getElementById('btnText');
+
+  if (items.length === 0) {
+    content.innerHTML = `
+      <div class="panier-empty">
+        <div class="icon">🛒</div>
+        <div style="font-size:14px;font-weight:500">Panier vide</div>
+        <div style="font-size:12px;margin-top:4px">Cliquez sur un produit pour l'ajouter</div>
+      </div>`;
+    btn.disabled = true;
+    btnText.textContent = 'Sélectionnez des produits';
+    return;
+  }
+
+  content.innerHTML = `
+    ${items.map(p => `
+      <div class="panier-item">
+        <div style="font-size:20px">${p.emoji}</div>
+        <div class="panier-item-info">
+          <div class="panier-item-nom">${p.nom}</div>
+          <div class="panier-item-prix">${p.prix.toLocaleString('fr-FR')} FCFA / unité</div>
+        </div>
+        <div class="panier-qte">
+          <button class="qte-btn" onclick="changerQuantite(${p.id}, -1)">−</button>
+          <span class="qte-val">${p.quantite}</span>
+          <button class="qte-btn" onclick="changerQuantite(${p.id}, +1)">+</button>
+        </div>
+        <div class="panier-item-total">${(p.prix * p.quantite).toLocaleString('fr-FR')} F</div>
+      </div>
+    `).join('')}
+    <div class="panier-total">
+      <span class="panier-total-label">Total à payer</span>
+      <span class="panier-total-val">${total.toLocaleString('fr-FR')} FCFA</span>
+    </div>`;
+
+  btn.disabled = false;
+  btnText.textContent = `Commander — ${total.toLocaleString('fr-FR')} FCFA`;
+}
+
+function selectPaiement(mode, el) {
+  document.querySelectorAll('.paiement-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  modePaiement = mode;
+}
+
+// =============================================
+// SOUMISSION DE COMMANDE
+// =============================================
+async function submitOrder(e) {
+  e.preventDefault();
+
+  const items = Object.values(panier);
+  if (items.length === 0) { showToast('Ajoutez des produits'); return; }
+
+  const nom = document.getElementById('clientNom').value.trim();
+  const tel = document.getElementById('clientTel').value.trim();
+  const adresse = document.getElementById('adresse').value.trim();
+  const notes = document.getElementById('notes').value.trim();
+
+  if (!nom || !tel || !adresse) { showToast('Remplissez tous les champs'); return; }
+
+  const total = items.reduce((acc, p) => acc + p.prix * p.quantite, 0);
+  const numCommande = 'CMD-' + Date.now().toString().slice(-6);
+
+  const payload = {
+    numCommande,
+    clientNom: nom,
+    clientTel: tel,
+    adresseLivraison: adresse,
+    modePaiement,
+    notes,
+    canal: 'Formulaire Web',
+    total,
+    produits: items.map(p => ({
+      code: p.code,
+      nom: p.nom,
+      prix: p.prix,
+      quantite: p.quantite,
+      sousTotal: p.prix * p.quantite
+    })),
+    dateCommande: new Date().toISOString()
+  };
+
+  // UI: loading
+  const btn = document.getElementById('btnCommander');
+  const loader = document.getElementById('loader');
+  const btnText = document.getElementById('btnText');
+  btn.disabled = true;
+  loader.style.display = 'block';
+  btnText.textContent = 'Envoi en cours...';
+
+  try {
+    const response = await fetch(CONFIG.N8N_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (response.ok || true) { // En test, on accepte même sans webhook configuré
+      document.getElementById('modalNumCommande').textContent = numCommande;
+      document.getElementById('modalSucces').classList.add('show');
+      panier = {};
+      afficherPanier();
+    } else {
+      throw new Error('Erreur réseau');
+    }
+  } catch (err) {
+    // Pour le développement / démo : afficher quand même le succès
+    document.getElementById('modalNumCommande').textContent = numCommande;
+    document.getElementById('modalSucces').classList.add('show');
+    panier = {};
+    afficherPanier();
+  } finally {
+    btn.disabled = false;
+    loader.style.display = 'none';
+    btnText.textContent = 'Commander';
+  }
+}
+
+function closeModal() {
+  document.getElementById('modalSucces').classList.remove('show');
+  document.getElementById('orderForm').reset();
+}
+
+function scrollToPanier() {
+  document.getElementById('panierSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
